@@ -10,7 +10,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 
 
-__version__ = "2.2.1"
+__version__ = "2.2.2"
 
 
 HELP_MESSAGE: str = ("""
@@ -220,21 +220,6 @@ async def command_all(update: Update, _: ContextTypes.DEFAULT_TYPE):
 
 
 
-def main():
-    print(f"{now()}: Initializing bot.")
-    init_global_vars()
-    print(f"{now()}: Started bot.")
-    app = ApplicationBuilder().token(BOT_TOKEN).concurrent_updates(True).build()
-    app.add_handler(CommandHandler("help",    command_help))
-    app.add_handler(CommandHandler("all",     command_all))
-    app.add_handler(CommandHandler("summon",  command_summon))
-    app.add_handler(CommandHandler("t",       command_t))
-    app.add_handler(CommandHandler("eat",     command_eat))
-    app.add_handler(CommandHandler("shower",  command_shower))
-    app.run_polling()
-
-
-
 def init_global_vars():
     from os import environ as env
     global BOT_TOKEN, ALLOWED_USERNAMES, CHAT_ID_TO_USERNAMES
@@ -266,6 +251,22 @@ def init_global_vars():
             if user not in ALLOWED_USERNAMES:
                 ALLOWED_USERNAMES.append(user)
     print(f"{ALLOWED_USERNAMES = }")
+
+
+
+def main():
+    print(f"{now()}: Bruh Minutes Timer Bot v{__version__}.")
+    print(f"{now()}: Initializing bot.")
+    init_global_vars()
+    app = ApplicationBuilder().token(BOT_TOKEN).concurrent_updates(True).build()
+    app.add_handler(CommandHandler("help",    command_help))
+    app.add_handler(CommandHandler("all",     command_all))
+    app.add_handler(CommandHandler("summon",  command_summon))
+    app.add_handler(CommandHandler("t",       command_t))
+    app.add_handler(CommandHandler("eat",     command_eat))
+    app.add_handler(CommandHandler("shower",  command_shower))
+    print(f"{now()}: Starting bot polling.")
+    app.run_polling()
 
 
 
