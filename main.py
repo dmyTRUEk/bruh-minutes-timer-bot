@@ -9,10 +9,10 @@ import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 
-from secrets_ import BOT_TOKEN, ALLOWED_USERS
+from secrets_ import BOT_TOKEN, ALLOWED_USERNAMES
 
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 
 
 HELP_MESSAGE: str = ("""
@@ -32,8 +32,6 @@ HELP_MESSAGE: str = ("""
 NODEAL: str = "1-900-902-NODEAL"
 
 
-
-ALLOWED_USERNAMES: list[str] = list(map(lambda user: user.username, ALLOWED_USERS))
 
 NUMBER_OF_TIMERS_RUNNING: int = 0
 
@@ -206,22 +204,22 @@ async def command_all(update: Update, _: ContextTypes.DEFAULT_TYPE):
 
     print(f"{datetime.now()}: @{update.message.from_user.username}: {update.message.text}")
 
-    usernames_in_chat: list[str] = []
-    #chat_id = update.effective_chat.id
-    for user in ALLOWED_USERS:
-        try:
-            # pylint: generated-members=update.effective_chat.get_member
-            member = await update.effective_chat.get_member(user.userid)
-        except:
-            print(f"{user} -> NOT FOUND NOT FOUND NOT FOUND: not in chat or bad user_id?")
-            continue
-        usernames_in_chat.append(user.username)
-        print(f"{user} -> {member.user.username}")
+    #usernames_in_chat: list[str] = []
+    ##chat_id = update.effective_chat.id
+    #for user in ALLOWED_USERS:
+    #    try:
+    #        # pylint: generated-members=update.effective_chat.get_member
+    #        member = await update.effective_chat.get_member(user.userid)
+    #    except:
+    #        print(f"{user} -> NOT FOUND NOT FOUND NOT FOUND: not in chat or bad user_id?")
+    #        continue
+    #    usernames_in_chat.append(user.username)
+    #    print(f"{user} -> {member.user.username}")
 
     #usernames_in_chat_with_at: list[str] = list(map(lambda username: '@'+username, usernames_in_chat))
-    usernames_in_chat_with_at: list[str] = ['@'+username for username in usernames_in_chat]
+    # usernames_in_chat_with_at: list[str] = ['@'+username for username in usernames_in_chat]
 
-    message: str = ' '.join(usernames_in_chat_with_at)
+    # message: str = ' '.join(usernames_in_chat_with_at)
 
     await update.message.reply_text("/all is under maintenance, sorry :'(")
     # FOR PRODUCTION:
