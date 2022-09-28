@@ -10,7 +10,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 
 
-__version__ = "2.2.2"
+__version__ = "2.2.3"
 
 
 HELP_MESSAGE: str = ("""
@@ -58,12 +58,12 @@ def print_number_of_timers_running():
 
 
 async def command_help(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
     if update.message.from_user.username not in ALLOWED_USERNAMES:
+        print(f"{now()}: @{update.message.from_user.username} -> unknown user, NODEAL")
         await update.message.reply_text(NODEAL)
-        # TODO: print in log that unknown user detected?
         return
 
-    print(f"{now()}: @{update.message.from_user.username}: /help")
     await update.message.reply_text(HELP_MESSAGE)
 
 
@@ -76,8 +76,8 @@ async def countdown(
         delay: Callable[[], int | float] = generate_bruh_minutes_in_seconds,
         ):
     if update.message.from_user.username not in ALLOWED_USERNAMES:
+        print(f"{now()}: @{update.message.from_user.username} -> unknown user, NODEAL")
         await update.message.reply_text(NODEAL)
-        # TODO: print in log that unknown user detected?
         return
 
     global NUMBER_OF_TIMERS_RUNNING
@@ -102,12 +102,12 @@ async def countdown(
 
 
 async def command_t(update: Update, _: ContextTypes.DEFAULT_TYPE):
-    if update.message.from_user.username not in ALLOWED_USERNAMES:
-        await update.message.reply_text(NODEAL)
-        # TODO: print in log that unknown user detected?
-        return
-
     print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
+
+    if update.message.from_user.username not in ALLOWED_USERNAMES:
+        print(f"{now()}: @{update.message.from_user.username} -> unknown user, NODEAL")
+        await update.message.reply_text(NODEAL)
+        return
 
     try:
         parts: list[str] = update.message.text.split(' ')
@@ -130,12 +130,12 @@ async def command_t(update: Update, _: ContextTypes.DEFAULT_TYPE):
 
 
 async def command_summon(update: Update, _: ContextTypes.DEFAULT_TYPE):
-    if update.message.from_user.username not in ALLOWED_USERNAMES:
-        await update.message.reply_text(NODEAL)
-        # TODO: print in log that unknown user detected?
-        return
-
     print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
+
+    if update.message.from_user.username not in ALLOWED_USERNAMES:
+        print(f"{now()}: @{update.message.from_user.username} -> unknown user, NODEAL")
+        await update.message.reply_text(NODEAL)
+        return
 
     try:
         parts: list[str] = update.message.text.split(' ')
@@ -160,12 +160,12 @@ async def command_summon(update: Update, _: ContextTypes.DEFAULT_TYPE):
 
 
 async def command_eat(update: Update, _: ContextTypes.DEFAULT_TYPE):
-    if update.message.from_user.username not in ALLOWED_USERNAMES:
-        await update.message.reply_text(NODEAL)
-        # TODO: print in log that unknown user detected?
-        return
-
     print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
+
+    if update.message.from_user.username not in ALLOWED_USERNAMES:
+        print(f"{now()}: @{update.message.from_user.username} -> unknown user, NODEAL")
+        await update.message.reply_text(NODEAL)
+        return
 
     try:
         parts: list[str] = update.message.text.split(' ')
@@ -183,12 +183,12 @@ async def command_eat(update: Update, _: ContextTypes.DEFAULT_TYPE):
 
 
 async def command_shower(update: Update, _: ContextTypes.DEFAULT_TYPE):
-    if update.message.from_user.username not in ALLOWED_USERNAMES:
-        await update.message.reply_text(NODEAL)
-        # TODO: print in log that unknown user detected?
-        return
-
     print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
+
+    if update.message.from_user.username not in ALLOWED_USERNAMES:
+        print(f"{now()}: @{update.message.from_user.username} -> unknown user, NODEAL")
+        await update.message.reply_text(NODEAL)
+        return
 
     try:
         parts: list[str] = update.message.text.split(' ')
@@ -206,12 +206,12 @@ async def command_shower(update: Update, _: ContextTypes.DEFAULT_TYPE):
 
 
 async def command_all(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
     if update.message.from_user.username not in ALLOWED_USERNAMES:
+        print(f"{now()}: @{update.message.from_user.username} -> unknown user, NODEAL")
         await update.message.reply_text(NODEAL)
-        # TODO: print in log that unknown user detected?
         return
 
-    print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
     chat_id: int = update.effective_chat.id # type: ignore
     usernames_in_chat: list[str] = CHAT_ID_TO_USERNAMES[chat_id].split(',')
     usernames_in_chat_with_at: list[str] = ['@'+username for username in usernames_in_chat]
@@ -226,7 +226,6 @@ def init_global_vars():
     if (bot_token_from_env := env.get("BOT_TOKEN", None)) != None:
         BOT_TOKEN = bot_token_from_env
     else:
-        print("trying to get from 'secrets_'")
         from secrets_ import BOT_TOKEN as bot_token_from_secrets
         BOT_TOKEN = bot_token_from_secrets
 
