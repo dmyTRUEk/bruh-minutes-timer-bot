@@ -13,3 +13,17 @@
 python3 main.py
 ```
 
+## Deploy to Heroku:
+1) create account at [heroku](https://heroku.com)
+2) deploy it to heroku
+3) set heroku workers amount to zero:
+  ```
+  heroku ps:scale worker=0
+  ```
+  and then to one:
+  ```
+  heroku ps:scale worker=1
+  ```
+
+Source: [Telegram Bot Heroku Deploy](https://github.com/AnshumanFauzdar/telegram-bot-heroku-deploy)
+
