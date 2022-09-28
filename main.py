@@ -10,7 +10,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 
 
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 
 
 HELP_MESSAGE: str = ("""
@@ -52,12 +52,8 @@ def generate_bruh_minutes_in_seconds():
     return randint(60 * 4, 60 * 7)
 
 
-def print_number_of_running_timers():
-    if NUMBER_OF_TIMERS_RUNNING == 0:
-        print("All timers finished.")
-    else:
-        timer_or_timers = "timer" if NUMBER_OF_TIMERS_RUNNING == 1 else "timers"
-        print(f"Still {NUMBER_OF_TIMERS_RUNNING} {timer_or_timers} running.")
+def print_number_of_timers_running():
+    print(f"Number of timers running: {NUMBER_OF_TIMERS_RUNNING}")
 
 
 
@@ -86,6 +82,7 @@ async def countdown(
 
     global NUMBER_OF_TIMERS_RUNNING
     NUMBER_OF_TIMERS_RUNNING += 1
+    print_number_of_timers_running()
     for minutes_left in range(number_of_messages, 0, -1):
         bruh_minutes_left_text = "bruh.minutes left" if minutes_left > 1 else "bruh.minute left"
         message: str = get_message()
@@ -100,7 +97,7 @@ async def countdown(
         await update.message.reply_text(f"{message}{status}")
 
     NUMBER_OF_TIMERS_RUNNING -= 1
-    print_number_of_running_timers()
+    print_number_of_timers_running()
 
 
 
