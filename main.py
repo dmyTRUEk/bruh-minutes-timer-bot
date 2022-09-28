@@ -215,7 +215,7 @@ async def command_all(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return
 
     print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
-    chat_id: int = update.effective_chat.id
+    chat_id: int = update.effective_chat.id # type: ignore
     usernames_in_chat: list[str] = CHAT_ID_TO_USERNAMES[chat_id].split(',')
     usernames_in_chat_with_at: list[str] = ['@'+username for username in usernames_in_chat]
     message: str = ' '.join(usernames_in_chat_with_at)
