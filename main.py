@@ -9,10 +9,8 @@ import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 
-from secrets_ import BOT_TOKEN, ALLOWED_USERNAMES
 
-
-__version__ = "2.1.1"
+__version__ = "2.2.0"
 
 
 HELP_MESSAGE: str = ("""
@@ -33,14 +31,18 @@ NODEAL: str = "1-900-902-NODEAL"
 
 
 
+BOT_TOKEN: str
+
+ALLOWED_USERNAMES: list[str]
+
+CHAT_ID_TO_USERNAMES: dict[int, str]
+
 NUMBER_OF_TIMERS_RUNNING: int = 0
 
 
 
-async def command_help(update: Update, _: ContextTypes.DEFAULT_TYPE):
-    print(f"{datetime.now()}: @{update.message.from_user.username}: /help")
-    await update.message.reply_text(HELP_MESSAGE)
-
+def now() -> datetime:
+    return datetime.now()
 
 
 def generate_bruh_minutes_in_seconds():
@@ -50,13 +52,23 @@ def generate_bruh_minutes_in_seconds():
     return randint(60 * 4, 60 * 7)
 
 
-
 def print_number_of_running_timers():
     if NUMBER_OF_TIMERS_RUNNING == 0:
         print("All timers finished.")
     else:
         timer_or_timers = "timer" if NUMBER_OF_TIMERS_RUNNING == 1 else "timers"
         print(f"Still {NUMBER_OF_TIMERS_RUNNING} {timer_or_timers} running.")
+
+
+
+async def command_help(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    if update.message.from_user.username not in ALLOWED_USERNAMES:
+        await update.message.reply_text(NODEAL)
+        # TODO: print in log that unknown user detected?
+        return
+
+    print(f"{now()}: @{update.message.from_user.username}: /help")
+    await update.message.reply_text(HELP_MESSAGE)
 
 
 
@@ -98,7 +110,7 @@ async def command_t(update: Update, _: ContextTypes.DEFAULT_TYPE):
         # TODO: print in log that unknown user detected?
         return
 
-    print(f"{datetime.now()}: @{update.message.from_user.username}: {update.message.text}")
+    print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
 
     try:
         parts: list[str] = update.message.text.split(' ')
@@ -126,7 +138,7 @@ async def command_summon(update: Update, _: ContextTypes.DEFAULT_TYPE):
         # TODO: print in log that unknown user detected?
         return
 
-    print(f"{datetime.now()}: @{update.message.from_user.username}: {update.message.text}")
+    print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
 
     try:
         parts: list[str] = update.message.text.split(' ')
@@ -156,7 +168,7 @@ async def command_eat(update: Update, _: ContextTypes.DEFAULT_TYPE):
         # TODO: print in log that unknown user detected?
         return
 
-    print(f"{datetime.now()}: @{update.message.from_user.username}: {update.message.text}")
+    print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
 
     try:
         parts: list[str] = update.message.text.split(' ')
@@ -179,7 +191,7 @@ async def command_shower(update: Update, _: ContextTypes.DEFAULT_TYPE):
         # TODO: print in log that unknown user detected?
         return
 
-    print(f"{datetime.now()}: @{update.message.from_user.username}: {update.message.text}")
+    print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
 
     try:
         parts: list[str] = update.message.text.split(' ')
@@ -202,33 +214,19 @@ async def command_all(update: Update, _: ContextTypes.DEFAULT_TYPE):
         # TODO: print in log that unknown user detected?
         return
 
-    print(f"{datetime.now()}: @{update.message.from_user.username}: {update.message.text}")
-
-    #usernames_in_chat: list[str] = []
-    ##chat_id = update.effective_chat.id
-    #for user in ALLOWED_USERS:
-    #    try:
-    #        # pylint: generated-members=update.effective_chat.get_member
-    #        member = await update.effective_chat.get_member(user.userid)
-    #    except:
-    #        print(f"{user} -> NOT FOUND NOT FOUND NOT FOUND: not in chat or bad user_id?")
-    #        continue
-    #    usernames_in_chat.append(user.username)
-    #    print(f"{user} -> {member.user.username}")
-
-    #usernames_in_chat_with_at: list[str] = list(map(lambda username: '@'+username, usernames_in_chat))
-    # usernames_in_chat_with_at: list[str] = ['@'+username for username in usernames_in_chat]
-
-    # message: str = ' '.join(usernames_in_chat_with_at)
-
-    await update.message.reply_text("/all is under maintenance, sorry :'(")
-    # FOR PRODUCTION:
-    #await update.message.reply_text(usernames_in_chat_with_at)
+    print(f"{now()}: @{update.message.from_user.username}: {update.message.text}")
+    chat_id: int = update.effective_chat.id
+    usernames_in_chat: list[str] = CHAT_ID_TO_USERNAMES[chat_id].split(',')
+    usernames_in_chat_with_at: list[str] = ['@'+username for username in usernames_in_chat]
+    message: str = ' '.join(usernames_in_chat_with_at)
+    await update.message.reply_text(message)
 
 
 
 def main():
-    print(f"{datetime.now()}: Started bot.")
+    print(f"{now()}: Initializing bot.")
+    init_global_vars()
+    print(f"{now()}: Started bot.")
     app = ApplicationBuilder().token(BOT_TOKEN).concurrent_updates(True).build()
     app.add_handler(CommandHandler("help",    command_help))
     app.add_handler(CommandHandler("all",     command_all))
@@ -237,6 +235,40 @@ def main():
     app.add_handler(CommandHandler("eat",     command_eat))
     app.add_handler(CommandHandler("shower",  command_shower))
     app.run_polling()
+
+
+
+def init_global_vars():
+    from os import environ as env
+    global BOT_TOKEN, ALLOWED_USERNAMES, CHAT_ID_TO_USERNAMES
+    if (bot_token_from_env := env.get("BOT_TOKEN", None)) != None:
+        BOT_TOKEN = bot_token_from_env
+    else:
+        print("trying to get from 'secrets_'")
+        from secrets_ import BOT_TOKEN as bot_token_from_secrets
+        BOT_TOKEN = bot_token_from_secrets
+
+    if (chat_id_to_usernames := env.get("CHAT_ID_TO_USERNAMES", None)) != None:
+        chats_to_commasep_users = chat_id_to_usernames.split(' ')
+        CHAT_ID_TO_USERNAMES = {}
+        for chat_to_commasep_users in chats_to_commasep_users:
+            chat_id, commasep_users = chat_to_commasep_users.split(':')
+            chat_id = int(chat_id)
+            CHAT_ID_TO_USERNAMES[chat_id] = commasep_users
+    else:
+        #from secrets_ import ALLOWED_USERNAMES as allowed_usernames_from_secrets
+        #ALLOWED_USERNAMES = allowed_usernames_from_secrets
+        from secrets_ import CHAT_ID_TO_USERNAMES as chat_id_to_usernames
+        CHAT_ID_TO_USERNAMES = chat_id_to_usernames
+
+    ALLOWED_USERNAMES = []
+    for key in CHAT_ID_TO_USERNAMES:
+        value = CHAT_ID_TO_USERNAMES[key]
+        users: list[str] = value.split(',')
+        for user in users:
+            if user not in ALLOWED_USERNAMES:
+                ALLOWED_USERNAMES.append(user)
+    print(f"{ALLOWED_USERNAMES = }")
 
 
 
