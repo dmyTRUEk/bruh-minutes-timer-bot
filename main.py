@@ -10,7 +10,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 
 
-__version__ = "2.2.4"
+__version__ = "2.2.5"
 
 
 HELP_MESSAGE: str = ("""
@@ -137,11 +137,17 @@ async def command_summon(update: Update, _: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(NODEAL)
         return
 
-    def generate_message():
-        message_to_repeat = "SUMMONING JUTSU\n"
+    parts: list[str] = update.message.text.split(' ')
+    if len(parts) == 1:
+        await update.message.reply_text("please, sign a summoning contract first")
+        return
+
+    def generate_message() -> str:
+        message: str = "SUMMONING JUTSU\n"
+        message_to_repeat: str = ' '.join(parts[1:])
         for _ in range(randint(1, 5) * randint(1, 5) * randint(1, 5)):
-            message_to_repeat += update.message.text + ' ' * randint(1, 5)
-        return message_to_repeat
+            message += message_to_repeat + ' ' * randint(1, 5)
+        return message
 
     await countdown(
         update,
